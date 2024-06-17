@@ -52,4 +52,4 @@ Thumbs.db
 /backend/tmp/
 
 # Configuration file for air
-.air.toml
+*.toml

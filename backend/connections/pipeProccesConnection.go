@@ -32,6 +32,7 @@ func (p *pipeProccesConnection) GetName() string {
 
 // Listen implements ProccesConnection.
 func (p *pipeProccesConnection) Listen() {
+	defer p.conn.Close()
 	reader := bufio.NewReader(p.conn)
 	for {
 		message, err := reader.ReadString('\n')
@@ -41,7 +42,7 @@ func (p *pipeProccesConnection) Listen() {
 		}
 		pLog, err := utils.CreateLog(message)
 		if err != nil {
-			log.Printf("Failed to creaate log: %v", err)
+			log.Printf("Failed to create log: %v", err)
 			return //gets out of func
 		}
 		err = p.logService.ProccesLog(pLog, p.sendFlag)

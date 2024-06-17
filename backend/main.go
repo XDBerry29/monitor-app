@@ -22,8 +22,8 @@ func main() {
 	server.Use(middleware.Logger())
 
 	//init the log server
-	FILE := os.Getenv("LOG_FILE_DIR")
-	file, err := utils.CreateLogFile(FILE)
+	DIR := os.Getenv("LOG_FILE_DIR")
+	file, err := utils.CreateLogFile(DIR)
 	if err != nil {
 		log.Fatal("Error creating file")
 	}
@@ -33,6 +33,7 @@ func main() {
 	hub := connections.NewConnectionHub()
 	pipeName := os.Getenv("PIPE_NAME")
 	pipeServer := connections.NewPipeConnectionReciver(pipeName, hub, logservice)
+	go logservice.UpdateFileOnNewDay(DIR)
 	go pipeServer.ListenNewConnection()
 
 	PORT := os.Getenv("PORT")

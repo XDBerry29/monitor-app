@@ -2,7 +2,10 @@ package services
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/XDBerry29/monitor-app/models"
 	"github.com/XDBerry29/monitor-app/repsitories"
@@ -10,26 +13,46 @@ import (
 )
 
 type LogService struct {
-	logRepo repsitories.LogRepository
+	logRepo repsitories.LogRepository[*os.File]
 	mu      sync.Mutex
 	//ws
 }
 
-func NewLogService(logRepo repsitories.LogRepository) *LogService {
+func NewLogService(logRepo repsitories.LogRepository[*os.File]) *LogService {
 	return &LogService{
 		logRepo: logRepo,
 	}
 }
 
-func (s *LogService) ProccesLog(log *models.Log, sendFlag bool) error {
+func (s *LogService) ProccesLog(logM *models.Log, sendFlag bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	//here we will sent the log to the websoket it will be writen in the console for now
 	if sendFlag {
-		fmt.Printf("%s\n", utils.LogToWriteString(log))
+		fmt.Printf("%s", utils.LogToWriteString(logM))
 	}
-	s.logRepo.SaveLog(log)
+	if err := s.logRepo.SaveLog(logM); err != nil {
+		log.Printf("Failed to write to file: %v", err)
+	}
 
+	return nil
+}
+
+func (l *LogService) UpdateFileOnNewDay(directory string) error {
+	now := time.Now()
+	midnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 1, 0, now.Location())
+	ticker := time.NewTicker(time.Until(midnight))
+	defer ticker.Stop()
+
+	for range ticker.C {
+		file, err := utils.CreateLogFile(directory)
+		if err != nil {
+			fmt.Printf("Failed to create new log file: %v\n", err)
+			return err
+		}
+		l.logRepo.UpdateRepo(file)
+		ticker.Reset(24 * time.Hour)
+	}
 	return nil
 }

@@ -24,5 +24,5 @@ func CreateLog(input string) (*models.Log, error) {
 }
 
 func LogToWriteString(log *models.Log) string {
-	return fmt.Sprintf("[%s|%s|%s] %s\n", log.Level, log.Timestamp, log.ProcessName, log.Message)
+	return fmt.Sprintf("[%s|%s|%s] %s", log.Level, log.Timestamp, log.ProcessName, log.Message)
 }

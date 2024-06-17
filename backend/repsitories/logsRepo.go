@@ -1,7 +1,16 @@
 package repsitories
 
-import "github.com/XDBerry29/monitor-app/models"
+import (
+	"os"
 
-type LogRepository interface {
+	"github.com/XDBerry29/monitor-app/models"
+)
+
+type Repo interface {
+	*os.File
+}
+
+type LogRepository[R Repo] interface {
 	SaveLog(log *models.Log) error
+	UpdateRepo(Repo R) error
 }

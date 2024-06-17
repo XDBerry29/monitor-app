@@ -60,9 +60,8 @@ func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
 	pipeConn := NewPipeConnection(conn_message.ProcessName, conn, p.logService)
 	p.hub.AddConnection(pipeConn)
 	defer p.hub.DeleteConnection(pipeConn)
-	defer conn.Close()
 
-	go pipeConn.Listen()
+	pipeConn.Listen()
 
 	return nil
 
