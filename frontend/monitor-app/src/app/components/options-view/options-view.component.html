@@ -1,0 +1,9 @@
+<div class="options-view">
+  <h2>Procceses</h2>
+  <div class="process-list">
+    <app-conn-card *ngFor="let process of processes$| async"
+      [process]="process"></app-conn-card>
+  </div>
+
+
+</div>

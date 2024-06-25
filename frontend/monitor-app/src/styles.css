@@ -1,0 +1,51 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Manrope, "Noto Sans", sans-serif;
+  --accent-color:#860786;
+}
+
+
+
+  /* Light mode styles */
+  .light-mode {
+    --background-color: #fafafa;
+    --primary-text-color: #212121;
+    --secondary-text-color: #616161;
+    --border-color: #e0e0e0;
+    --severity-debug-color: #66bb6a3f; /* Light Green */
+    --severity-info-color: #29b5f63b; /* Light Blue */
+    --severity-warning-color: #ffa726; /* Light Orange */
+    --severity-error-color: #ef5350; /* Light Red */
+    --severity-critical-color: #d32f2f; /* Dark Red */
+    --button-background-color: #dfdfdf; /* Lightened equivalent */
+    --severity-error-back-color: #f0f0f0;
+    --severity-critical-back-color: #e0e0e0c4;
+    --button-hover-color: #d0d0d0; /* Slightly darker for hover */
+    --button-shadow-color: rgba(0, 0, 0, 0.233); /* Subtle shadow */
+    --accent-color: #cb4ed1; /* Lightened equivalent of accent color */
+    --log-shadow:0 2px 2px rgba(0, 0, 0, 0.055);
+  }
+
+
+  /* Dark mode styles */
+  .dark-mode {
+    --accent-color:#860786;
+    --background-color: #111318;
+    --primary-text-color: #ffffff;
+    --secondary-text-color: #93adc8;
+    --border-color: #1f2937;
+    --severity-debug-color: #92adc82f;
+    --severity-info-color: #00bbd45e;
+    --severity-warning-color: #ff9800;
+    --severity-error-color: #f44336;
+    --severity-critical-color: #b71c1c;
+    --severity-error-back-color: #1f29375b;
+    --severity-critical-back-color: #1f2937c0;
+    --button-background-color: #1f2937;
+    --button-hover-color: #444444;
+    --button-shadow-color: rgba(0, 0, 0, 0.1);
+    --log-shadow:0 2px 2px rgba(0, 0, 0, 0.5);
+  }
+
+

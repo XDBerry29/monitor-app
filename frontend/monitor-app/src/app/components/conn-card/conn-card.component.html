@@ -1,0 +1,11 @@
+<div class="process-card" [ngClass]="{'disconnected': !process.connected, 'monitoring': process.monitoring}" (click)="onToggleMonitoring()">
+  <span class="process-status">
+    {{ process.connected ? 'Connected' : 'Disconnected' }}
+  </span>
+  <div class="process-name">{{ process.name }}</div>
+  <div class="process-actions">
+    <button *ngIf="!process.connected" class="remove-button" (click)="removeProccesFromList()">
+      Remove Connection
+    </button>
+  </div>
+</div>

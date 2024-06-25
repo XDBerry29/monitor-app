@@ -1,0 +1,16 @@
+<div [ngClass]="getClasses()" class="log-message">
+  <div class="log-content">
+    <div class="log-header">
+      <span (click)="toggleDetails()">
+        <b>{{ getSeverityName(log.severity) }}</b> | {{ log.time | date: "short" }} | {{ log.process }}
+      </span>
+      <button class="view-details-button" (click)="toggleDetails()">
+        <mat-icon>{{ expanded ? "expand_less" : "expand_more" }}</mat-icon>
+        {{ expanded ? "Hide Details" : "View Details" }}
+      </button>
+    </div>
+    <div class="log-body" [class.expanded]="expanded">
+      {{ log.message }}
+    </div>
+  </div>
+</div>

@@ -61,7 +61,7 @@ func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
 	p.hub.AddConnection(pipeConn)
 	defer p.hub.DeleteConnection(pipeConn)
 
-	pipeConn.Listen()
+	 pipeConn.Listen()
 
 	return nil
 
