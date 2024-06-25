@@ -9,7 +9,7 @@ export enum SeverityLevel {
 
 export interface Log {
     severity: SeverityLevel;
-    time: Date;
+    time: string;
     process: string;
     message: string;
   }

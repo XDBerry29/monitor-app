@@ -2,7 +2,7 @@
   <div class="log-content">
     <div class="log-header">
       <span (click)="toggleDetails()">
-        <b>{{ getSeverityName(log.severity) }}</b> | {{ log.time | date: "short" }} | {{ log.process }}
+        <b>{{ getSeverityName(log.severity) }}</b> | {{ log.time }} | {{ log.process }}
       </span>
       <button class="view-details-button" (click)="toggleDetails()">
         <mat-icon>{{ expanded ? "expand_less" : "expand_more" }}</mat-icon>

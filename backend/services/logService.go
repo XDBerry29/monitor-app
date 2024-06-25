@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,14 +14,15 @@ import (
 )
 
 type LogService struct {
-	logRepo repsitories.LogRepository[*os.File]
-	mu      sync.Mutex
-	//ws
+	logRepo   repsitories.LogRepository[*os.File]
+	mu        sync.Mutex
+	wsService *WsService
 }
 
-func NewLogService(logRepo repsitories.LogRepository[*os.File]) *LogService {
+func NewLogService(logRepo repsitories.LogRepository[*os.File], wsServce *WsService) *LogService {
 	return &LogService{
-		logRepo: logRepo,
+		logRepo:   logRepo,
+		wsService: wsServce,
 	}
 }
 
@@ -30,6 +32,12 @@ func (s *LogService) ProccesLog(logM *models.Log, sendFlag bool) error {
 
 	//here we will sent the log to the websoket it will be writen in the console for now
 	if sendFlag {
+		logData, err := json.Marshal(logM)
+		if err != nil {
+			return err
+		}
+		s.wsService.SendAll(logData)
+
 		fmt.Printf("%s", utils.LogToWriteString(logM))
 	}
 	if err := s.logRepo.SaveLog(logM); err != nil {

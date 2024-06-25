@@ -1,7 +1,8 @@
-import { Component, ElementRef, HostListener, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
 import {Log, SeverityLevel} from '../../models/log'
 import { LogService } from '../../services/log.service';
 import { Observable, Subscription, tap } from 'rxjs';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-log-view',
@@ -13,10 +14,12 @@ export class LogViewComponent implements AfterViewChecked{
   logMessagesContainer!: ElementRef;
 
   logs$: Observable<Log[]>;
+  dropdownOpen = false;
   ScrollToBottom = true;
   severityLevels = Object.keys(SeverityLevel).filter(key => isNaN(Number(key)));
-  minSeverity = "DEBUG";
-  constructor(private logService: LogService){
+  displayedSeverityLevels: string[] = [...this.severityLevels];
+  minSeverity = 'DEBUG';
+  constructor(private logService: LogService, private wsService: SocketService){
     this.logs$ = this.logService.logs$
     console.log(this.minSeverity)
   }
@@ -27,14 +30,29 @@ export class LogViewComponent implements AfterViewChecked{
     }
   }
 
+  toggleDropdown(): void {
+    if (this.dropdownOpen) {
+      this.dropdownOpen = false;
+    } else {
+      this.dropdownOpen = true;
+    }
+  }
+
+  selectOption(value: string): void {
+    this.minSeverity = value;
+    this.toggleDropdown()
+    this.filterLogs();
+  }
+
 
 
   clearLogs(): void {
     this.logService.clearLogs();
+    this.ScrollToBottom = true;
   }
 
   addLog(): void {
-    this.logService.addLog({ severity: SeverityLevel.WARNING, time: new Date(), process: 'Process4', message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nec pretium metus. Quisque congue leo in commodo laoreet. Ut placerat accumsan mi, vel sollicitudin ligula tincidunt pellentesque. Praesent non erat hendrerit, faucibus mi a, sagittis augue. Integer efficitur sapien sit amet mi facilisis pretium. Praesent aliquet elementum lorem nec dignissim. Donec vitae placerat magna, vitae blandit augue. Suspendisse non sem at lacus posuere pellentesque et eget velit. Aenean fringilla facilisis neque, nec elementum nulla finibus vel. Aliquam eros orci, semper ac feugiat a, suscipit in est." });
+    this.logService.addLog({ severity: SeverityLevel.WARNING, time: "12:00:00", process: 'Process4', message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nec pretium metus. Quisque congue leo in commodo laoreet. Ut placerat accumsan mi, vel sollicitudin ligula tincidunt pellentesque. Praesent non erat hendrerit, faucibus mi a, sagittis augue. Integer efficitur sapien sit amet mi facilisis pretium. Praesent aliquet elementum lorem nec dignissim. Donec vitae placerat magna, vitae blandit augue. Suspendisse non sem at lacus posuere pellentesque et eget velit. Aenean fringilla facilisis neque, nec elementum nulla finibus vel. Aliquam eros orci, semper ac feugiat a, suscipit in est." });
 
   }
 

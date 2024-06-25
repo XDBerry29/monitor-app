@@ -3,25 +3,26 @@
     <h2>Log Events</h2>
     <div class="log-actions">
       <label for="severity-filter" class="severity-filter-label">Min Severity:</label>
-      <select id="severity-filter" [(ngModel)]="minSeverity" (change)="filterLogs()" class="severity-filter">
-        <option *ngFor="let level of severityLevels" [value]="level">{{ level }}</option>
-      </select>
+      <div class="dropdown">
+        <div class="dropdown-select" (click)="toggleDropdown()">
+          {{ minSeverity }}
+          <mat-icon class="dropdown-icon">{{  dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
+        </div>
+        <div class="dropdown-options" *ngIf="dropdownOpen">
+          <div *ngFor="let level of displayedSeverityLevels" (click)="selectOption(level)">
+            {{ level }}
+          </div>
+        </div>
+      </div>
       <button (click)="clearLogs()" class="action-button">Clear Logs</button>
       <button (click)="addLog()" class="action-button">Add Log</button>
     </div>
   </div>
 
   <div class="log-messages" (scroll)="onScroll($event)" #logMessagesContainer>
-    <app-log-message
-      *ngFor="let log of logs$ | async"
-      [log]="log"
-    ></app-log-message>
+    <app-log-message *ngFor="let log of logs$ | async" [log]="log"></app-log-message>
   </div>
-  <button
-    *ngIf="!ScrollToBottom"
-    class="scroll-to-bottom-button"
-    (click)="scrollToBottom()"
-  >
+  <button *ngIf="!ScrollToBottom" class="scroll-to-bottom-button" (click)="scrollToBottom()">
     <mat-icon>arrow_downward</mat-icon>
   </button>
 </div>

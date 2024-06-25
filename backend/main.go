@@ -5,7 +5,9 @@ import (
 	"os"
 
 	"github.com/XDBerry29/monitor-app/connections"
+	"github.com/XDBerry29/monitor-app/controller"
 	"github.com/XDBerry29/monitor-app/repsitories"
+	"github.com/XDBerry29/monitor-app/routes"
 	"github.com/XDBerry29/monitor-app/services"
 	"github.com/XDBerry29/monitor-app/utils"
 	"github.com/joho/godotenv"
@@ -29,12 +31,16 @@ func main() {
 	}
 
 	logRepo := repsitories.NewLogRepoFile(file)
-	logservice := services.NewLogService(logRepo)
+	wsService := services.NewWsService()
+	logservice := services.NewLogService(logRepo, wsService)
 	hub := connections.NewConnectionHub()
 	pipeName := os.Getenv("PIPE_NAME")
 	pipeServer := connections.NewPipeConnectionReciver(pipeName, hub, logservice)
 	go logservice.UpdateFileOnNewDay(DIR)
 	go pipeServer.ListenNewConnection()
+
+	wsController := controller.NewWsController(wsService)
+	routes.InitWsRoutes(wsController, server)
 
 	PORT := os.Getenv("PORT")
 	server.Logger.Fatal(server.Start(":" + PORT))
