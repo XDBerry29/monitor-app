@@ -21,7 +21,7 @@ export class SocketService {
     this.log_socket.onmessage = (event) => {
       const log: Log = JSON.parse(event.data);
       logService.addLog(log);
-      console.log(log);
+      //console.log(log);
     };
     this.process_socket.onmessage = (event) => {
       const conn_message = JSON.parse(event.data);

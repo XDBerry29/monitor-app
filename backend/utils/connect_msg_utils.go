@@ -1,26 +1,21 @@
 package utils
 
 import (
-	"fmt"
-	"strings"
+	"encoding/json"
 
 	"github.com/XDBerry29/monitor-app/models"
 )
 
-func CreateConnectionMessageNewConn(input string) (*models.ConnectionMessage, error) {
-	parts := strings.SplitN(input, "|", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid connection message format")
+func CreateConnectionMessageNewConn(input []byte) (*models.ConnectionMessage, error) {
+	var connMsg models.ConnectionMessage
+
+	if err := json.Unmarshal(input, &connMsg); err != nil {
+		return nil, err
 	}
 
-	connMsg := &models.ConnectionMessage{
-		ProcessName: parts[1],
-		Timestamp:   parts[0],
-		Monitoring:  true,
-		Connected:   true,
-	}
-
-	return connMsg, nil
+	connMsg.Connected = true
+	connMsg.Monitoring = true
+	return &connMsg, nil
 }
 
 func CreateConnectionMessage(name, timestamp string, connected bool, monitoring bool) *models.ConnectionMessage {

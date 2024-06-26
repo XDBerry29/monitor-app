@@ -8,79 +8,34 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class ProcessesService {
 
   private processes: Process[] = [
-    {
-      name: 'API', connected: false, monitoring: false,
-      time: ''
-    },
-    {
-      name: 'Web', connected: true, monitoring: true,
-      time: ''
-    },
-    {
-      name: 'Worker', connected: true, monitoring: true,
-      time: ''
-    },
-    {
-      name: 'Scheduler', connected: true, monitoring: true,
-      time: ''
-    },
-    {
-      name: 'Daemon', connected: true, monitoring: true,
-      time: ''
-    },
-    {
-      name: 'Cron', connected: true, monitoring: true,
-      time: ''
-    },
-    {
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },{
-      name: 'All', connected: true, monitoring: true,
-      time: ''
-    },
+
   ];
 
   private processesSubject = new BehaviorSubject<Process[]>(this.processes);
   processes$: Observable<Process[]> = this.processesSubject.asObservable();
 
-  addProcess(process: Process): void {
+  addNewProcess(process: Process): void {
     this.processes.push(process);
     this.processesSubject.next(this.processes);
   }
 
+  getProccesByName(name: string): Process| undefined{
+    return this.processes.find(p => p.name === name);
+  }
+
   handleConnectionMessage(conn_message: Process) {
-      console.log(conn_message);
+    const process = this.getProccesByName(conn_message.name);
+    if (process) {
+      process.monitoring = conn_message.monitoring;
+     if (conn_message.connected != process.connected){
+      process.connected = conn_message.connected;
+      this.handleProcessConnection(process);
+     }
+
+    }else{
+      this.addNewProcess(conn_message)
+    }
+    this.processesSubject.next(this.processes);
   }
 
   deleteProcess(processName: string): void {
@@ -88,16 +43,13 @@ export class ProcessesService {
     this.processesSubject.next(this.processes);
   }
 
-  reconnectProcess(processName: string): void {
-    const process = this.processes.find(p => p.name === processName);
-    if (process) {
-      process.connected = true;
-      this.processesSubject.next(this.processes);
-    }
+  handleProcessConnection(process: Process): void {
+      //if connected connect message if dissconected dissconect message
   }
 
   disconnectProcess(process: Process){
     process.connected = false;
+    this.processesSubject.next(this.processes);
   }
 
   toggleMonitoring(process: Process){

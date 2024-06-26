@@ -33,13 +33,10 @@ func (p *pipeProccesConnection) GetName() string {
 // Listen implements ProccesConnection.
 func (p *pipeProccesConnection) Listen() error {
 	defer p.conn.Close()
-	reader := bufio.NewReader(p.conn)
-	for {
-		message, err := reader.ReadString('\n')
-		if err != nil {
-			log.Printf("Failed to read from pipe: %v", err)
-			return err
-		}
+	scanner := bufio.NewScanner(p.conn)
+
+	for scanner.Scan() {
+		message := scanner.Bytes()
 		pLog, err := utils.CreateLog(message)
 		if err != nil {
 			log.Printf("Failed to create log: %v", err)
@@ -47,10 +44,23 @@ func (p *pipeProccesConnection) Listen() error {
 		}
 		err = p.logService.ProccesLog(pLog, p.sendFlag)
 		if err != nil {
-			log.Printf("Failed to procces log: %v", err)
+			log.Printf("Failed to process log: %v", err)
 			return err
 		}
 	}
+
+	if err := scanner.Err(); err != nil {
+		// Check for EOF error to detect connection closure
+		if err == bufio.ErrFinalToken {
+			log.Println("Connection closed by client.")
+		} else {
+			log.Printf("Scanner error: %v", err)
+		}
+		return err
+	}
+
+	log.Println("Connection closed normally.")
+	return nil
 }
 
 // SwitchTransmiFlag implements ProccesConnection.

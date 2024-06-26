@@ -49,13 +49,14 @@ func (p *pipeConnectionReciver) ListenNewConnection() error {
 
 // HandleConnection implements ConnectionReciver.
 func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
-	reader := bufio.NewReader(conn)
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		return err
+	scanner := bufio.NewScanner(conn)
+	if !scanner.Scan() {
+		return scanner.Err()
 	}
 
-	conn_message, err := utils.CreateConnectionMessageNewConn(message)
+	initialMessage := scanner.Bytes()
+
+	conn_message, err := utils.CreateConnectionMessageNewConn(initialMessage)
 	if err != nil {
 		return err
 	}
@@ -66,13 +67,11 @@ func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
 	p.connService.ProccesConnectionMessage(conn_message)
 	defer p.hub.DeleteConnection(pipeConn)
 
-	conn_err := pipeConn.Listen()
-	if conn_err != nil {
-		now := time.Now()
-		formatTime := now.Format("15:04:05")
-		msg := utils.CreateConnectionMessage(pipeConn.GetName(), formatTime, false, false)
-		p.connService.ProccesConnectionMessage(msg)
-	}
+	pipeConn.Listen()
+	now := time.Now()
+	formatTime := now.Format("15:04:05")
+	msg := utils.CreateConnectionMessage(pipeConn.GetName(), formatTime, false, false)
+	p.connService.ProccesConnectionMessage(msg)
 
 	return nil
 
