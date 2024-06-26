@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"time"
 
 	"github.com/XDBerry29/monitor-app/services"
 	"github.com/XDBerry29/monitor-app/utils"
@@ -11,16 +12,18 @@ import (
 )
 
 type pipeConnectionReciver struct {
-	pipeName   string
-	hub        ConnectionHub
-	logService *services.LogService
+	pipeName    string
+	hub         ConnectionHub
+	logService  *services.LogService
+	connService *services.ConnectionService
 }
 
-func NewPipeConnectionReciver(pipename string, hub ConnectionHub, logService *services.LogService) ConnectionReciver {
+func NewPipeConnectionReciver(pipename string, hub ConnectionHub, logService *services.LogService, connService *services.ConnectionService) ConnectionReciver {
 	return &pipeConnectionReciver{
-		pipeName:   pipename,
-		hub:        hub,
-		logService: logService,
+		pipeName:    pipename,
+		hub:         hub,
+		logService:  logService,
+		connService: connService,
 	}
 }
 
@@ -52,16 +55,24 @@ func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
 		return err
 	}
 
-	conn_message, err := utils.CreateConnectionMessage(message)
+	conn_message, err := utils.CreateConnectionMessageNewConn(message)
 	if err != nil {
 		return err
 	}
 
 	pipeConn := NewPipeConnection(conn_message.ProcessName, conn, p.logService)
+
 	p.hub.AddConnection(pipeConn)
+	p.connService.ProccesConnectionMessage(conn_message)
 	defer p.hub.DeleteConnection(pipeConn)
 
-	 pipeConn.Listen()
+	conn_err := pipeConn.Listen()
+	if conn_err != nil {
+		now := time.Now()
+		formatTime := now.Format("15:04:05")
+		msg := utils.CreateConnectionMessage(pipeConn.GetName(), formatTime, false, false)
+		p.connService.ProccesConnectionMessage(msg)
+	}
 
 	return nil
 

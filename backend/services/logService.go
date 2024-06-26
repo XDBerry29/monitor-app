@@ -14,15 +14,17 @@ import (
 )
 
 type LogService struct {
-	logRepo   repsitories.LogRepository[*os.File]
-	mu        sync.Mutex
-	wsService *WsService
+	logRepo      repsitories.LogRepository[*os.File]
+	mu           sync.Mutex
+	wsService    *WsService
+	min_severity int
 }
 
 func NewLogService(logRepo repsitories.LogRepository[*os.File], wsServce *WsService) *LogService {
 	return &LogService{
-		logRepo:   logRepo,
-		wsService: wsServce,
+		logRepo:      logRepo,
+		wsService:    wsServce,
+		min_severity: 0,
 	}
 }
 
@@ -31,14 +33,14 @@ func (s *LogService) ProccesLog(logM *models.Log, sendFlag bool) error {
 	defer s.mu.Unlock()
 
 	//here we will sent the log to the websoket it will be writen in the console for now
-	if sendFlag {
+	if sendFlag && logM.Level >= s.min_severity {
 		logData, err := json.Marshal(logM)
 		if err != nil {
 			return err
 		}
 		s.wsService.SendAll(logData)
 
-		fmt.Printf("%s", utils.LogToWriteString(logM))
+		//fmt.Printf("%s", utils.LogToWriteString(logM))
 	}
 	if err := s.logRepo.SaveLog(logM); err != nil {
 		log.Printf("Failed to write to file: %v", err)

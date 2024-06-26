@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitWsRoutes(c *controller.WsController, e *echo.Echo) {
-	e.GET("/ws", c.HandleWs)
+func InitWsRoutes(wsC *controller.WsController, conC *controller.ConnectionController, e *echo.Echo) {
+	e.GET("/ws", wsC.HandleWs)
+	e.GET("/wsp", conC.HandleWs)
 }

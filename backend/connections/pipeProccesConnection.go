@@ -31,24 +31,24 @@ func (p *pipeProccesConnection) GetName() string {
 }
 
 // Listen implements ProccesConnection.
-func (p *pipeProccesConnection) Listen() {
+func (p *pipeProccesConnection) Listen() error {
 	defer p.conn.Close()
 	reader := bufio.NewReader(p.conn)
 	for {
 		message, err := reader.ReadString('\n')
 		if err != nil {
 			log.Printf("Failed to read from pipe: %v", err)
-			return //gets out of fun
+			return err
 		}
 		pLog, err := utils.CreateLog(message)
 		if err != nil {
 			log.Printf("Failed to create log: %v", err)
-			return //gets out of func
+			return err
 		}
 		err = p.logService.ProccesLog(pLog, p.sendFlag)
 		if err != nil {
 			log.Printf("Failed to procces log: %v", err)
-			return //gets out of func
+			return err
 		}
 	}
 }
@@ -56,4 +56,8 @@ func (p *pipeProccesConnection) Listen() {
 // SwitchTransmiFlag implements ProccesConnection.
 func (p *pipeProccesConnection) SwitchTransmiFlag() {
 	p.sendFlag = !p.sendFlag
+}
+
+func (p *pipeProccesConnection) GetSendFlag() bool {
+	return p.sendFlag
 }

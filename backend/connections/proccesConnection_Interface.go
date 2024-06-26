@@ -1,7 +1,8 @@
 package connections
 
 type ProccesConnection interface {
-	Listen()
+	Listen() error
 	SwitchTransmiFlag()
 	GetName() string
+	GetSendFlag() bool
 }

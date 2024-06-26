@@ -22,7 +22,7 @@ func (s *WsService) AddWs(ws *websocket.Conn) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.wsList[ws] = true
-	fmt.Print("Connected")
+	//fmt.Print("Connected")
 }
 
 func (s *WsService) RemoveWs(ws *websocket.Conn) {
@@ -33,7 +33,16 @@ func (s *WsService) RemoveWs(ws *websocket.Conn) {
 
 func (s *WsService) SendAll(message []byte) {
 	for ws := range s.wsList {
-		ws.WriteMessage(websocket.TextMessage, message)
-		//iff err fuck conection // error handeling later
+		if err := ws.WriteMessage(websocket.TextMessage, message); err != nil {
+			s.RemoveWs(ws)
+			fmt.Print("Client Dissconected!")
+		}
+	}
+}
+
+func (s *WsService) SendOne(message []byte, ws *websocket.Conn) {
+	if err := ws.WriteMessage(websocket.TextMessage, message); err != nil {
+		s.RemoveWs(ws)
+		fmt.Print("Client Dissconected!")
 	}
 }

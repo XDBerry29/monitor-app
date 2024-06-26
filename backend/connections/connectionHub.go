@@ -1,6 +1,8 @@
 package connections
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type connectionHub struct {
 	hub map[string]ProccesConnection
@@ -32,4 +34,9 @@ func (p *connectionHub) GetConectionByName(connectionName string) (ProccesConnec
 	}
 
 	return resultConnection, nil
+}
+
+// GetAllConnections implements ConnectionHub.
+func (p *connectionHub) GetAllConnections() map[string]ProccesConnection {
+	return p.hub
 }

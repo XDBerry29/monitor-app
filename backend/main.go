@@ -31,16 +31,22 @@ func main() {
 	}
 
 	logRepo := repsitories.NewLogRepoFile(file)
-	wsService := services.NewWsService()
-	logservice := services.NewLogService(logRepo, wsService)
+
+	wsServiceLogs := services.NewWsService()
+	wsServiceConn := services.NewWsService()
+
+	logservice := services.NewLogService(logRepo, wsServiceLogs)
+	connService := services.NewConnectionService(wsServiceConn)
+
 	hub := connections.NewConnectionHub()
 	pipeName := os.Getenv("PIPE_NAME")
-	pipeServer := connections.NewPipeConnectionReciver(pipeName, hub, logservice)
+	pipeServer := connections.NewPipeConnectionReciver(pipeName, hub, logservice, connService)
 	go logservice.UpdateFileOnNewDay(DIR)
 	go pipeServer.ListenNewConnection()
 
-	wsController := controller.NewWsController(wsService)
-	routes.InitWsRoutes(wsController, server)
+	connController := controller.NewConnectionController(wsServiceConn, hub)
+	wsController := controller.NewWsController(wsServiceLogs)
+	routes.InitWsRoutes(wsController, connController, server)
 
 	PORT := os.Getenv("PORT")
 	server.Logger.Fatal(server.Start(":" + PORT))
