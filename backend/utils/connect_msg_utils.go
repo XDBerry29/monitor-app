@@ -14,15 +14,13 @@ func CreateConnectionMessageNewConn(input []byte) (*models.ConnectionMessage, er
 	}
 
 	connMsg.Connected = true
-	connMsg.Monitoring = true
 	return &connMsg, nil
 }
 
-func CreateConnectionMessage(name, timestamp string, connected bool, monitoring bool) *models.ConnectionMessage {
+func CreateConnectionMessage(name, timestamp string, connected bool) *models.ConnectionMessage {
 	return &models.ConnectionMessage{
 		ProcessName: name,
 		Timestamp:   timestamp,
-		Monitoring:  monitoring,
 		Connected:   connected,
 	}
 }

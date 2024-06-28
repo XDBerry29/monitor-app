@@ -12,18 +12,20 @@ import (
 )
 
 type pipeConnectionReciver struct {
-	pipeName    string
-	hub         ConnectionHub
-	logService  *services.LogService
-	connService *services.ConnectionService
+	pipeName      string
+	hub           ConnectionHub
+	logService    *services.LogService
+	connService   *services.ConnectionService
+	clientService *services.ClientService
 }
 
-func NewPipeConnectionReciver(pipename string, hub ConnectionHub, logService *services.LogService, connService *services.ConnectionService) ConnectionReciver {
+func NewPipeConnectionReciver(pipename string, hub ConnectionHub, logService *services.LogService, connService *services.ConnectionService, clientService *services.ClientService) ConnectionReciver {
 	return &pipeConnectionReciver{
-		pipeName:    pipename,
-		hub:         hub,
-		logService:  logService,
-		connService: connService,
+		pipeName:      pipename,
+		hub:           hub,
+		logService:    logService,
+		connService:   connService,
+		clientService: clientService,
 	}
 }
 
@@ -67,10 +69,13 @@ func (p *pipeConnectionReciver) HandleConnection(conn net.Conn) error {
 	p.connService.ProccesConnectionMessage(conn_message)
 	defer p.hub.DeleteConnection(pipeConn)
 
+	p.clientService.AddOnFilterToAllClients(conn_message.ProcessName)
+	defer p.clientService.AddOnFilterToAllClients(conn_message.ProcessName)
+
 	pipeConn.Listen()
 	now := time.Now()
 	formatTime := now.Format("15:04:05")
-	msg := utils.CreateConnectionMessage(pipeConn.GetName(), formatTime, false, false)
+	msg := utils.CreateConnectionMessage(pipeConn.GetName(), formatTime, false)
 	p.connService.ProccesConnectionMessage(msg)
 
 	return nil

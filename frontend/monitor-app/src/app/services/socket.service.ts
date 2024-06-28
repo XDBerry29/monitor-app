@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { Log } from '../models/log';
 import { ProcessesService } from './processes.service';
 import { handleAutoChangeDetectionStatus } from '@angular/cdk/testing';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +15,19 @@ export class SocketService {
   private root_address: string = 'localhost:8080';
 
 
+
   constructor(private logService: LogService, private proccessesService: ProcessesService) {
+    const clientId = uuidv4();
+
     this.log_socket = new WebSocket('ws://'+ this.root_address +'/ws');
+    this.log_socket.onopen = () => {
+      this.log_socket.send(JSON.stringify({ type: 'init', clientId }));
+    };
+
     this.process_socket = new WebSocket('ws://'+ this.root_address +'/wsp');
+    this.process_socket.onopen = () => {
+      this.process_socket.send(JSON.stringify({ type: 'init', clientId }));
+    };
 
     this.log_socket.onmessage = (event) => {
       const log: Log = JSON.parse(event.data);
@@ -29,3 +40,5 @@ export class SocketService {
     };
   }
 }
+
+
