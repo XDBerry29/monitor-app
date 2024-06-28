@@ -1,3 +1,5 @@
+import { ProcessFilterMsg } from './../../models/process-filter-msg';
+import { SocketService } from './../../services/socket.service';
 import { Component, Input } from '@angular/core';
 import { Process } from '../../models/process';
 import { ProcessesService } from '../../services/processes.service';
@@ -11,10 +13,15 @@ export class ConnCardComponent {
 
   @Input() process!: Process;
 
-  constructor(private service: ProcessesService) { }
+  constructor(private service: ProcessesService, private socketService:SocketService) { }
 
   onToggleMonitoring(): void {
     this.service.toggleMonitoring(this.process);
+    let filterMsg : ProcessFilterMsg = {
+      name: this.process.name,
+      monitoring: this.process.monitoring
+    }
+    this.socketService.sendProcessFilterMessage(filterMsg);
   }
 
   removeProccesFromList() {

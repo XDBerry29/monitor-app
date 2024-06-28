@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/XDBerry29/monitor-app/models"
@@ -32,7 +33,39 @@ func (w *wsConnService) AddWs(id string, ws *websocket.Conn) {
 
 // Listen implements WsService.
 func (w *wsConnService) Listen(id string) {
-	panic("unimplemented")
+	client := w.clientService.GetClient(id)
+	if client == nil {
+		fmt.Println("Client not found")
+		w.RemoveWs(id)
+		return
+	}
+
+	defer w.RemoveWs(id)
+
+	conn := client.GetConnWs()
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket closed unexpectedly: %v", err)
+			} else {
+				log.Printf("WebSocket read error: %v", err)
+			}
+			break
+		}
+
+		var filterMsg models.ProcessFilterMsg
+		err = json.Unmarshal(message, &filterMsg)
+		if err != nil {
+			log.Printf("Failed to unmarshal JSON message: %v", err)
+			continue
+		}
+
+		client.SetMonitoring(filterMsg.Name, filterMsg.Monitoring)
+
+	}
+
 }
 
 // RemoveWs implements WsService.
@@ -51,6 +84,11 @@ func (w *wsConnService) SendAll(message models.ConnectionMessage) {
 	}
 	for id := range w.wsList {
 		client := w.clientService.GetClient(id)
+		if client == nil {
+			fmt.Println("Client not found")
+			w.RemoveWs(id)
+			continue
+		}
 		if err := client.GetConnWs().WriteMessage(websocket.TextMessage, sMessage); err != nil {
 			w.RemoveWs(id)
 			fmt.Print("Client Dissconected!")
@@ -61,5 +99,18 @@ func (w *wsConnService) SendAll(message models.ConnectionMessage) {
 
 // SendOne implements WsService.
 func (w *wsConnService) SendOne(message models.ConnectionMessage, id string) {
-	panic("unimplemented")
+	client := w.clientService.GetClient(id)
+	if client == nil {
+		fmt.Println("Client not found")
+		w.RemoveWs(id)
+		return
+	}
+	sMessage, err := json.Marshal(message)
+	if err != nil {
+		return
+	}
+	if err := client.GetConnWs().WriteMessage(websocket.TextMessage, sMessage); err != nil {
+		w.RemoveWs(id)
+		fmt.Print("Client Dissconected!")
+	}
 }

@@ -1,3 +1,4 @@
+import { LogFilterMsg } from './../../models/log-filter-msg';
 import { Component, ElementRef, HostListener, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
 import {Log, SeverityLevel} from '../../models/log'
 import { LogService } from '../../services/log.service';
@@ -21,7 +22,7 @@ export class LogViewComponent implements AfterViewChecked{
   minSeverity = 'DEBUG';
   constructor(private logService: LogService, private wsService: SocketService){
     this.logs$ = this.logService.logs$
-    console.log(this.minSeverity)
+    this.filterLogs()
   }
 
   ngAfterViewChecked(): void {
@@ -57,7 +58,12 @@ export class LogViewComponent implements AfterViewChecked{
   }
 
   filterLogs() {
+    console.log(SeverityLevel[this.minSeverity as keyof typeof SeverityLevel])
     console.log(this.minSeverity)
+    let filterMsg : LogFilterMsg = {
+      severity: SeverityLevel[this.minSeverity as keyof typeof SeverityLevel]
+    }
+    this.wsService.sendLogFilterMessage(filterMsg)
   }
 
   scrollToBottom() {
@@ -75,7 +81,5 @@ export class LogViewComponent implements AfterViewChecked{
         this.ScrollToBottom = false;
       }
   }
-
-
 
 }

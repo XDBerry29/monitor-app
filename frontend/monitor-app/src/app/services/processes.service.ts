@@ -1,6 +1,9 @@
+import { ProcessFilterMsg } from './../models/process-filter-msg';
+
 import { Injectable } from '@angular/core';
 import { Process } from '../models/process';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, filter } from 'rxjs';
+import { SocketService } from './socket.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,9 @@ export class ProcessesService {
   private processesSubject = new BehaviorSubject<Process[]>(this.processes);
   processes$: Observable<Process[]> = this.processesSubject.asObservable();
 
+
   addNewProcess(process: Process): void {
+    process.monitoring = true
     this.processes.push(process);
     this.processesSubject.next(this.processes);
   }
@@ -26,9 +31,9 @@ export class ProcessesService {
   handleConnectionMessage(conn_message: Process) {
     const process = this.getProccesByName(conn_message.name);
     if (process) {
-      process.monitoring = conn_message.monitoring;
      if (conn_message.connected != process.connected){
       process.connected = conn_message.connected;
+
       this.handleProcessConnection(process);
      }
 
@@ -44,6 +49,7 @@ export class ProcessesService {
   }
 
   handleProcessConnection(process: Process): void {
+      process.monitoring = process.connected
       //if connected connect message if dissconected dissconect message
   }
 
@@ -54,6 +60,6 @@ export class ProcessesService {
 
   toggleMonitoring(process: Process){
     process.monitoring = !process.monitoring;
-    //api logic here send message to the backend to stop sending
   }
+
 }

@@ -12,7 +12,7 @@ import { ProcessesService } from '../../services/processes.service';
 export class OptionsViewComponent {
   processes$: Observable<Process[]>;
 
-  constructor(private processService: ProcessesService, private logService: LogService) {
+  constructor(private processService: ProcessesService) {
     this.processes$ = this.processService.processes$;
   }
 

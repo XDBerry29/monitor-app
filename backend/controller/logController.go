@@ -56,5 +56,7 @@ func (c *LogController) HandleWs(context echo.Context) error {
 
 	c.wsService.AddWs(clientId, ws)
 
+	go c.wsService.Listen(clientId)
+
 	return nil
 }

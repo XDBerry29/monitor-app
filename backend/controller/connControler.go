@@ -58,9 +58,11 @@ func (c *ConnectionController) HandleWs(context echo.Context) error {
 
 	for _, connection := range proccesConnection {
 		message := utils.CreateConnectionMessage(connection.GetName(), "", true)
-		client.SetMonitoring(clientId, true)
+		client.SetMonitoring(connection.GetName(), true)
 		c.wsService.SendOne(*message, clientId)
 	}
+
+	go c.wsService.Listen(clientId)
 
 	return nil
 
